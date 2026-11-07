@@ -234,6 +234,7 @@
                                 <option value="Deputy Leader">Deputy Leader</option>
                                 <option value="Red Master">Red Master</option>
                                 <option value="Head of the Family">Head of the Family</option>
+                                <option value="AlLeader">AlLeader</option>
                             </select>
                         </div>
                         <div>
@@ -415,10 +416,11 @@
 
     <!-- JAVASCRIPT -->
     <script>
+        // Alapértelmezett fiókok listája (Admin, Vezető, Fabian, Ádám, Huni)
         const defaultUsers = [
             { id: 1, user: 'admin', pass: 'admin123', role: 'Admin', rank: 'Head of the Family' },
             { id: 2, user: 'leader', pass: 'leader123', role: 'Vezető', rank: 'Deputy Leader' },
-            { id: 3, user: 'fabian1970', pass: 'fabian1970.#', role: 'Tag', rank: 'Head Of Family' },
+            { id: 3, user: 'fabian1970', pass: 'fabian1970.#', role: 'Tag', rank: 'Solider' },
             { id: 4, user: 'adam', pass: 'adam321', role: 'Tag', rank: 'Solider' },
             { id: 5, user: 'huni', pass: 'huni321', role: 'Tag', rank: 'AlLeader' }
         ];
@@ -477,19 +479,242 @@
                 document.getElementById('dashUserRole').innerText = currentUser.role || 'Tag';
                 document.getElementById('dashUserRank').innerText = currentUser.rank || 'Nincs Rang';
 
+                // ADMIN ELLENŐRZÉS: Csak Admin joggal jelenik meg a fiók létrehozás opció
                 if (currentUser.role === 'Admin') {
                     createAccountSection.classList.remove('hidden');
                 } else {
                     createAccountSection.classList.add('hidden');
                 }
+
+                // Széf adatok betöltése
+                document.getElementById('dashMoney').innerText = '$' + Number(vaultData.money || 0).toLocaleString();
+                document.getElementById('dashRadio').innerText = vaultData.radio || '---.- MHz';
+                
+                document.getElementById('editVaultMoney').value = vaultData.money || 0;
+                document.getElementById('editVaultRadio').value = vaultData.radio || '';
+                document.getElementById('editVaultImgUrl').value = vaultData.imageUrl || '';
+
+                const img = document.getElementById('vaultImage');
+                const txt = document.getElementById('noVaultImageText');
+                if (vaultData.imageUrl) {
+                    img.src = vaultData.imageUrl;
+                    img.classList.remove('hidden');
+                    txt.classList.add('hidden');
+                } else {
+                    img.classList.add('hidden');
+                    txt.classList.remove('hidden');
+                }
+
+                renderUsersList();
+                renderVaultLogs();
+                renderSupplyRequests();
             } else {
                 publicContent.classList.remove('hidden');
                 dashboardMain.classList.add('hidden');
                 authBtn.innerText = 'Bejelentkezés';
-                createAccountSection.classList.add('hidden');
             }
         }
 
+        function createNewAccount() {
+            if (!currentUser || currentUser.role !== 'Admin') {
+                alert('Csak adminisztrátorok hozhatnak létre új fiókot!');
+                return;
+            }
+
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value.trim();
+            const rank = document.getElementById('newRank').value;
+            const role = document.getElementById('newRole').value;
+
+            if (!u || !p) {
+                alert('Kérlek add meg a felhasználónevet és a jelszót!');
+                return;
+            }
+
+            if (users.find(x => x.user.toLowerCase() === u.toLowerCase())) {
+                alert('Ez a felhasználónév már létezik!');
+                return;
+            }
+
+            const newUser = { id: Date.now(), user: u, pass: p, role: role, rank: rank };
+            users.push(newUser);
+            localStorage.setItem('sm_users', JSON.stringify(users));
+
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+
+            renderUsersList();
+            alert(`Fiók sikeresen létrehozva: ${u}`);
+        }
+
+        function renderUsersList() {
+            const list = document.getElementById('dashUsersList');
+            list.innerHTML = '';
+
+            users.forEach(u => {
+                const item = document.createElement('div');
+                item.className = 'bg-dark p-3 rounded border border-dark-border flex items-center justify-between';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold text-white">${u.user}</span>
+                        <div class="text-[10px] text-gray-400">
+                            Rang: <span class="text-gray-200">${u.rank || 'Nincs'}</span> | Jog: <span class="text-red-primary">${u.role || 'Tag'}</span>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function updateVaultData() {
+            const m = parseFloat(document.getElementById('editVaultMoney').value) || 0;
+            const r = document.getElementById('editVaultRadio').value.trim();
+            const img = document.getElementById('editVaultImgUrl').value.trim();
+
+            vaultData = { money: m, radio: r, imageUrl: img };
+            localStorage.setItem('sm_vault_data', JSON.stringify(vaultData));
+            renderAll();
+            alert('Széf adatok elmentve!');
+        }
+
+        function addVaultLog() {
+            const type = document.getElementById('logActionType').value;
+            const cat = document.getElementById('logItemCategory').value;
+            const details = document.getElementById('logItemDetails').value.trim();
+
+            if (!details) {
+                alert('Kérlek add meg a tétel leírását!');
+                return;
+            }
+
+            const newLog = {
+                id: Date.now(),
+                user: currentUser ? currentUser.user : 'Ismeretlen',
+                type: type,
+                category: cat,
+                details: details,
+                date: new Date().toLocaleString('hu-HU')
+            };
+
+            vaultLogs.unshift(newLog);
+            localStorage.setItem('sm_vault_logs', JSON.stringify(vaultLogs));
+            document.getElementById('logItemDetails').value = '';
+            renderVaultLogs();
+        }
+
+        function renderVaultLogs() {
+            const list = document.getElementById('vaultLogsList');
+            list.innerHTML = '';
+
+            if (vaultLogs.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-2">Nincs még bejegyzés a mozgásnaplóban.</p>';
+                return;
+            }
+
+            vaultLogs.forEach(log => {
+                const item = document.createElement('div');
+                const badgeColor = log.type === 'BERAKTA' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-red-400 border-red-500/30 bg-red-500/10';
+                item.className = 'bg-dark p-2.5 rounded border border-dark-border flex flex-col gap-1';
+                item.innerHTML = `
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="font-bold text-white">${log.user}</span>
+                        <span class="text-[10px] text-gray-500">${log.date}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-1.5 py-0.5 rounded border text-[9px] font-bold ${badgeColor}">${log.type}</span>
+                        <span class="text-gray-300 font-semibold">[${log.category}]</span>
+                        <span class="text-gray-400">${log.details}</span>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function addSupplyRequest() {
+            const cat = document.getElementById('reqCategory').value;
+            const name = document.getElementById('reqItemName').value.trim();
+            const amount = document.getElementById('reqAmount').value.trim();
+            const reason = document.getElementById('reqReason').value.trim();
+
+            if (!name || !amount) {
+                alert('Kérlek add meg a megnevezést és a mennyiséget!');
+                return;
+            }
+
+            const newReq = {
+                id: Date.now(),
+                user: currentUser ? currentUser.user : 'Ismeretlen',
+                category: cat,
+                name: name,
+                amount: amount,
+                reason: reason,
+                status: 'Függőben',
+                date: new Date().toLocaleString('hu-HU')
+            };
+
+            supplyRequests.unshift(newReq);
+            localStorage.setItem('sm_supply_requests', JSON.stringify(supplyRequests));
+
+            document.getElementById('reqItemName').value = '';
+            document.getElementById('reqAmount').value = '';
+            document.getElementById('reqReason').value = '';
+
+            renderSupplyRequests();
+        }
+
+        function renderSupplyRequests() {
+            const list = document.getElementById('requestsList');
+            list.innerHTML = '';
+
+            if (supplyRequests.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-2">Nincs még igénylés leadva.</p>';
+                return;
+            }
+
+            supplyRequests.forEach(req => {
+                const item = document.createElement('div');
+                item.className = 'bg-dark p-3 rounded border border-dark-border space-y-1';
+                item.innerHTML = `
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="font-bold text-white">${req.user}</span>
+                        <span class="text-[10px] text-gray-500">${req.date}</span>
+                    </div>
+                    <div class="text-gray-300">
+                        <span class="text-red-primary font-bold">${req.category}</span>: ${req.name} (${req.amount})
+                    </div>
+                    ${req.reason ? `<div class="text-[10px] text-gray-400 italic">Indok: ${req.reason}</div>` : ''}
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function exportUsersJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(users, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "sm_users.json");
+            dlAnchorElem.click();
+        }
+
+        function importUsersJSON(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        users = imported;
+                        localStorage.setItem('sm_users', JSON.stringify(users));
+                        renderUsersList();
+                        alert('Felhasználók sikeresen importálva!');
+                    }
+                } catch (err) {
+                    alert('Hibás JSON fájl!');
+                }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
+
+        // Kezdő inicializálás
         renderAll();
     </script>
 </body>
