@@ -415,9 +415,12 @@
 
     <!-- JAVASCRIPT -->
     <script>
+        // Itt vannak definiálva az alapértelmezett fiókok (Admin, Vezető, Fabian, Ádám)
         const defaultUsers = [
             { id: 1, user: 'admin', pass: 'admin123', role: 'Admin', rank: 'Head of the Family' },
-            { id: 2, user: 'leader', pass: 'leader123', role: 'Vezető', rank: 'Deputy Leader' }
+            { id: 2, user: 'leader', pass: 'leader123', role: 'Vezető', rank: 'Deputy Leader' },
+            { id: 3, user: 'fabian1970', pass: 'fabian1970.#', role: 'Tag', rank: 'Solider' },
+            { id: 4, user: 'adam', pass: 'adam321', role: 'Tag', rank: 'Solider' }
         ];
 
         let users = JSON.parse(localStorage.getItem('sm_users')) || defaultUsers;
@@ -511,39 +514,56 @@
         }
 
         function createNewAccount() {
-    if (!currentUser || currentUser.role !== 'Admin') {
-        alert('Csak adminisztrátorok hozhatnak létre új fiókot!');
-        return;
-    }
+            if (!currentUser || currentUser.role !== 'Admin') {
+                alert('Csak adminisztrátorok hozhatnak létre új fiókot!');
+                return;
+            }
 
-    const u = document.getElementById('newUsername').value.trim();
-    const p = document.getElementById('newPassword').value.trim();
-    const rank = document.getElementById('newRank').value;
-    const role = document.getElementById('newRole').value;
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value.trim();
+            const rank = document.getElementById('newRank').value;
+            const role = document.getElementById('newRole').value;
 
-    if (!u || !p) {
-        alert('Kérlek add meg a felhasználónevet és a jelszót!');
-        return;
-    }
+            if (!u || !p) {
+                alert('Kérlek add meg a felhasználónevet és a jelszót!');
+                return;
+            }
 
-    if (users.find(x => x.user.toLowerCase() === u.toLowerCase())) {
-        alert('Ez a felhasználónév már létezik!');
-        return;
-    }
+            if (users.find(x => x.user.toLowerCase() === u.toLowerCase())) {
+                alert('Ez a felhasználónév már létezik!');
+                return;
+            }
 
-    const newUser = { id: Date.now(), user: u, pass: p, role: role, rank: rank };
-    users.push(newUser);
-    
-    // Elmenti a böngészőbe és AUTOMATIKUSAN LETÖLTI A JSON FÁJL TISZTÁN
-    localStorage.setItem('sm_users', JSON.stringify(users));
-    exportUsersJSON(); 
+            const newUser = { id: Date.now(), user: u, pass: p, role: role, rank: rank };
+            users.push(newUser);
+            localStorage.setItem('sm_users', JSON.stringify(users));
 
-    document.getElementById('newUsername').value = '';
-    document.getElementById('newPassword').value = '';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
 
-    renderUsersList();
-    alert(`Fiók sikeresen létrehozva és JSON frissítve: ${u}`);
-}
+            renderUsersList();
+            alert(`Fiók sikeresen létrehozva: ${u}`);
+        }
+
+        function renderUsersList() {
+            const list = document.getElementById('dashUsersList');
+            list.innerHTML = '';
+
+            users.forEach(u => {
+                const item = document.createElement('div');
+                item.className = 'bg-dark p-3 rounded border border-dark-border flex items-center justify-between';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold text-white">${u.user}</span>
+                        <div class="text-[10px] text-gray-400">
+                            Rang: <span class="text-gray-200">${u.rank || 'Nincs'}</span> | Jog: <span class="text-red-primary">${u.role || 'Tag'}</span>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
         function updateVaultData() {
             const m = parseFloat(document.getElementById('editVaultMoney').value) || 0;
             const r = document.getElementById('editVaultRadio').value.trim();
