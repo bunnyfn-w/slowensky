@@ -208,63 +208,11 @@
                 </div>
             </div>
 
-            <!-- JOBB OSZLOP (ADMIN & FIÓK LÉTREHOZÁS + TAGOK) -->
+            <!-- JOBB OSZLOP (CSAK A TAGOK LISTÁJA) -->
             <div class="space-y-6">
-                
-                <!-- FIÓK LÉTREHOZÁSA (CSAK ADMINNAK JELENIK MEG) -->
-                <div id="createAccountSection" class="hidden bg-dark-card border border-red-primary/40 p-6 rounded-lg space-y-4 shadow-xl">
-                    <h3 class="font-heading font-extrabold text-red-primary text-lg uppercase">ÚJ FIÓK LÉTREHOZÁSA</h3>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-[10px] font-mono text-gray-400 mb-1">Felhasználónév</label>
-                            <input type="text" id="newUsername" placeholder="Felhasználónév" class="w-full bg-dark border border-dark-border rounded px-3 py-1.5 text-xs text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-mono text-gray-400 mb-1">Jelszó</label>
-                            <input type="password" id="newPassword" placeholder="Jelszó" class="w-full bg-dark border border-dark-border rounded px-3 py-1.5 text-xs text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-mono text-gray-400 mb-1">Frakció Rang</label>
-                            <select id="newRank" class="w-full bg-dark border border-dark-border rounded px-3 py-1.5 text-xs text-white font-mono">
-                                <option value="Solider">Solider</option>
-                                <option value="Contract Killer">Contract Killer</option>
-                                <option value="Deputy Commander">Deputy Commander</option>
-                                <option value="Commanding Officer">Commanding Officer</option>
-                                <option value="Deputy Leader">Deputy Leader</option>
-                                <option value="Red Master">Red Master</option>
-                                <option value="Head of the Family">Head of the Family</option>
-                                <option value="AlLeader">AlLeader</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-mono text-gray-400 mb-1">Rendszer Jogosultság</label>
-                            <select id="newRole" class="w-full bg-dark border border-dark-border rounded px-3 py-1.5 text-xs text-white">
-                                <option value="Admin">Adminisztrátor (Teljes jog)</option>
-                                <option value="Vezető">Leader / Vezető</option>
-                                <option value="Tag">Frakció Tag</option>
-                            </select>
-                        </div>
-                        <button onclick="createNewAccount()" class="w-full bg-red-primary hover:bg-red-hover text-white text-xs font-mono py-2 rounded font-bold uppercase tracking-wider">
-                            Fiók Létrehozása
-                        </button>
-                    </div>
-
-                    <div class="flex gap-2 pt-2 border-t border-dark-border">
-                        <button onclick="exportUsersJSON()" class="flex-1 bg-dark-border hover:bg-gray-700 text-white text-[11px] font-mono py-2 rounded font-bold uppercase">
-                            JSON Export
-                        </button>
-                        <label class="flex-1 bg-dark-border hover:bg-gray-700 text-white text-[11px] font-mono py-2 rounded font-bold uppercase text-center cursor-pointer">
-                            JSON Import
-                            <input type="file" onchange="importUsersJSON(event)" accept=".json" class="hidden">
-                        </label>
-                    </div>
-                </div>
-
-                <!-- LÉTEZŐ TAGOK LISTÁJA -->
                 <div class="bg-dark-card border border-dark-border p-6 rounded-lg">
                     <h3 class="font-heading font-extrabold text-white text-lg uppercase mb-4">Regisztrált Fiókok</h3>
-                    <div id="dashUsersList" class="space-y-2 font-mono text-xs max-h-72 overflow-y-auto"></div>
+                    <div id="dashUsersList" class="space-y-2 font-mono text-xs max-h-96 overflow-y-auto"></div>
                 </div>
             </div>
 
@@ -416,8 +364,8 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        // Alapértelmezett fiókok listája (Admin, Vezető, Fabian, Ádám, Huni)
-        const defaultUsers = [
+        // Itt vannak fixen a fiókok kodolva:
+        const users = [
             { id: 1, user: 'admin', pass: 'admin123', role: 'Admin', rank: 'Head of the Family' },
             { id: 2, user: 'leader', pass: 'leader123', role: 'Vezető', rank: 'Deputy Leader' },
             { id: 3, user: 'fabian1970', pass: 'fabian1970.#', role: 'Tag', rank: 'Solider' },
@@ -425,7 +373,6 @@
             { id: 5, user: 'huni', pass: 'huni321', role: 'Tag', rank: 'AlLeader' }
         ];
 
-        let users = JSON.parse(localStorage.getItem('sm_users')) || defaultUsers;
         let currentUser = JSON.parse(localStorage.getItem('sm_current_user')) || null;
         let vaultData = JSON.parse(localStorage.getItem('sm_vault_data')) || { money: 18000000, radio: '222.4 MHz', imageUrl: '' };
         let vaultLogs = JSON.parse(localStorage.getItem('sm_vault_logs')) || [];
@@ -468,7 +415,6 @@
             const publicContent = document.getElementById('publicContent');
             const dashboardMain = document.getElementById('dashboardMain');
             const authBtn = document.getElementById('authBtn');
-            const createAccountSection = document.getElementById('createAccountSection');
 
             if (currentUser) {
                 publicContent.classList.add('hidden');
@@ -478,13 +424,6 @@
                 document.getElementById('dashUserName').innerText = currentUser.user;
                 document.getElementById('dashUserRole').innerText = currentUser.role || 'Tag';
                 document.getElementById('dashUserRank').innerText = currentUser.rank || 'Nincs Rang';
-
-                // ADMIN ELLENŐRZÉS: Csak Admin joggal jelenik meg a fiók létrehozás opció
-                if (currentUser.role === 'Admin') {
-                    createAccountSection.classList.remove('hidden');
-                } else {
-                    createAccountSection.classList.add('hidden');
-                }
 
                 // Széf adatok betöltése
                 document.getElementById('dashMoney').innerText = '$' + Number(vaultData.money || 0).toLocaleString();
@@ -513,38 +452,6 @@
                 dashboardMain.classList.add('hidden');
                 authBtn.innerText = 'Bejelentkezés';
             }
-        }
-
-        function createNewAccount() {
-            if (!currentUser || currentUser.role !== 'Admin') {
-                alert('Csak adminisztrátorok hozhatnak létre új fiókot!');
-                return;
-            }
-
-            const u = document.getElementById('newUsername').value.trim();
-            const p = document.getElementById('newPassword').value.trim();
-            const rank = document.getElementById('newRank').value;
-            const role = document.getElementById('newRole').value;
-
-            if (!u || !p) {
-                alert('Kérlek add meg a felhasználónevet és a jelszót!');
-                return;
-            }
-
-            if (users.find(x => x.user.toLowerCase() === u.toLowerCase())) {
-                alert('Ez a felhasználónév már létezik!');
-                return;
-            }
-
-            const newUser = { id: Date.now(), user: u, pass: p, role: role, rank: rank };
-            users.push(newUser);
-            localStorage.setItem('sm_users', JSON.stringify(users));
-
-            document.getElementById('newUsername').value = '';
-            document.getElementById('newPassword').value = '';
-
-            renderUsersList();
-            alert(`Fiók sikeresen létrehozva: ${u}`);
         }
 
         function renderUsersList() {
@@ -686,32 +593,6 @@
                 `;
                 list.appendChild(item);
             });
-        }
-
-        function exportUsersJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(users, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "sm_users.json");
-            dlAnchorElem.click();
-        }
-
-        function importUsersJSON(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        users = imported;
-                        localStorage.setItem('sm_users', JSON.stringify(users));
-                        renderUsersList();
-                        alert('Felhasználók sikeresen importálva!');
-                    }
-                } catch (err) {
-                    alert('Hibás JSON fájl!');
-                }
-            };
-            fileReader.readAsText(event.target.files[0]);
         }
 
         // Kezdő inicializálás
