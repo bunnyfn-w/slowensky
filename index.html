@@ -43,8 +43,8 @@
                 
                 <div class="hidden md:flex items-center space-x-8 text-sm font-semibold tracking-wide">
                     <a href="#tortenet" class="hover:text-red-primary transition-colors uppercase">Történet</a>
-                    <a href="#rangok" class="hover:text-red-primary transition-colors uppercase">Rangok</a>
-                    <a href="#torveny" class="hover:text-red-primary transition-colors uppercase">Frakció Törvény</a>
+                    <button onclick="openRanksModal()" class="hover:text-red-primary transition-colors uppercase text-left font-semibold">Rangok</button>
+                    <button onclick="openRulesModal()" class="hover:text-red-primary transition-colors uppercase text-left font-semibold">Frakció Törvény</button>
                 </div>
 
                 <div>
@@ -69,6 +69,14 @@
                 <p class="text-xl sm:text-2xl text-gray-400 font-light max-w-3xl mx-auto italic">
                     "Egy család. Egy vér. Egy törvény."
                 </p>
+                <div class="mt-8 flex justify-center gap-4 flex-wrap">
+                    <button onclick="openRanksModal()" class="bg-dark-card border border-red-primary/50 hover:bg-red-primary/10 text-white px-6 py-3 rounded font-heading font-bold text-sm uppercase tracking-wider transition-colors">
+                        ⭐ Tekintsd meg a Rangokat
+                    </button>
+                    <button onclick="openRulesModal()" class="bg-dark-card border border-red-primary/50 hover:bg-red-primary/10 text-white px-6 py-3 rounded font-heading font-bold text-sm uppercase tracking-wider transition-colors">
+                        📜 Tekintsd meg a Frakció Törvényt
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -130,7 +138,7 @@
                         <p id="noVaultImageText" class="text-xs text-gray-500 font-mono py-4">Nincs beállítva széf kép link.</p>
                     </div>
 
-                    <!-- SZÉF MÓDOSÍTÁS (PÉNZEK, FREKVENCIÁK, KÉPEK) -->
+                    <!-- SZÉF MÓDOSÍTÁS -->
                     <div class="pt-4 border-t border-dark-border space-y-3">
                         <span class="text-xs font-mono font-bold text-red-primary uppercase block">SZÉF KÉSZLET ÉS KÉP MÓDOSÍTÁSA</span>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -147,7 +155,7 @@
                                 <input type="text" id="editVaultImgUrl" class="w-full bg-dark border border-dark-border rounded px-3 py-1.5 text-xs text-white font-mono" placeholder="https://...">
                             </div>
                         </div>
-                        <button onclick="saveVaultData()" class="w-full bg-red-primary hover:bg-red-hover text-white text-xs font-mono py-2 rounded font-bold uppercase">
+                        <button onclick="updateVaultData()" class="w-full bg-red-primary hover:bg-red-hover text-white text-xs font-mono py-2 rounded font-bold uppercase">
                             Széf Adatok Elmentése
                         </button>
                     </div>
@@ -203,7 +211,7 @@
             <!-- JOBB OSZLOP (ADMIN & FIÓK LÉTREHOZÁS + TAGOK) -->
             <div class="space-y-6">
                 
-                <!-- FIÓK LÉTREHOZÁSA (RANG ÉS JOGOSULTSÁG ADÁSSAL) -->
+                <!-- FIÓK LÉTREHOZÁSA -->
                 <div class="bg-dark-card border border-red-primary/40 p-6 rounded-lg space-y-4 shadow-xl">
                     <h3 class="font-heading font-extrabold text-red-primary text-lg uppercase">ÚJ FIÓK LÉTREHOZÁSA</h3>
                     
@@ -218,7 +226,15 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-mono text-gray-400 mb-1">Frakció Rang</label>
-                            <input type="text" id="newRank" placeholder="pl. Boss, Underboss, Capo, Katona" class="w-full bg-dark border border-dark-border rounded px-3 py-1.5 text-xs text-white">
+                            <select id="newRank" class="w-full bg-dark border border-dark-border rounded px-3 py-1.5 text-xs text-white font-mono">
+                                <option value="Solider">Solider</option>
+                                <option value="Contract Killer">Contract Killer</option>
+                                <option value="Deputy Commander">Deputy Commander</option>
+                                <option value="Commanding Officer">Commanding Officer</option>
+                                <option value="Deputy Leader">Deputy Leader</option>
+                                <option value="Red Master">Red Master</option>
+                                <option value="Head of the Family">Head of the Family</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-mono text-gray-400 mb-1">Rendszer Jogosultság</label>
@@ -285,11 +301,123 @@
         </div>
     </div>
 
+    <!-- RANGOK MODAL (POPUP) -->
+    <div id="ranksModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-dark-card border border-red-primary/40 rounded-lg w-full max-w-md overflow-hidden shadow-2xl my-8">
+            <div class="bg-dark px-6 py-4 border-b border-dark-border flex justify-between items-center sticky top-0 z-10">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-red-primary rounded-full animate-pulse"></span>
+                    <h3 class="text-lg font-heading font-extrabold text-white uppercase tracking-wider">Frakció Rangok</h3>
+                </div>
+                <button onclick="closeRanksModal()" class="text-gray-400 hover:text-white font-bold text-2xl px-2">&times;</button>
+            </div>
+            
+            <div class="p-6 space-y-2 text-sm font-mono">
+                <div class="bg-dark p-3 rounded border border-dark-border text-white font-bold">1. Solider</div>
+                <div class="bg-dark p-3 rounded border border-dark-border text-white font-bold">2. Contract Killer</div>
+                <div class="bg-dark p-3 rounded border border-dark-border text-white font-bold">3. Deputy Commander</div>
+                <div class="bg-dark p-3 rounded border border-dark-border text-white font-bold">4. Commanding Officer</div>
+                <div class="bg-dark p-3 rounded border border-dark-border text-white font-bold">5. Deputy Leader</div>
+                <div class="bg-dark p-3 rounded border border-dark-border text-white font-bold">6. Red Master</div>
+                <div class="bg-dark p-3 rounded border border-red-primary text-red-primary font-bold">7. Head of the Family</div>
+            </div>
+            
+            <div class="bg-dark px-6 py-4 border-t border-dark-border text-right">
+                <button onclick="closeRanksModal()" class="bg-red-primary hover:bg-red-hover text-white text-xs font-mono font-bold uppercase px-6 py-2 rounded transition-colors">
+                    Bezárás
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FRAKCIÓ TÖRVÉNY MODAL (POPUP) -->
+    <div id="rulesModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-dark-card border border-red-primary/40 rounded-lg w-full max-w-3xl overflow-hidden shadow-2xl my-8">
+            <div class="bg-dark px-6 py-4 border-b border-dark-border flex justify-between items-center sticky top-0 z-10">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-red-primary rounded-full animate-pulse"></span>
+                    <h3 class="text-lg font-heading font-extrabold text-white uppercase tracking-wider">Frakció Szabályzat — Slovensky Maffia</h3>
+                </div>
+                <button onclick="closeRulesModal()" class="text-gray-400 hover:text-white font-bold text-2xl px-2">&times;</button>
+            </div>
+            
+            <div class="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto text-gray-300 text-sm leading-relaxed">
+                <div class="text-center pb-4 border-b border-dark-border">
+                    <p class="text-red-primary font-heading font-black text-base italic">„A család az első. A parancs megkérdőjelezhetetlen.”</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-heading font-bold text-white text-base uppercase text-red-primary mb-1">I. Hierarchia és Parancskövetés</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-gray-300">
+                            <li>A magasabb rangú tag utasításait tiszteletben kell tartani és követni.</li>
+                            <li>Ranggal visszaélni tilos.</li>
+                            <li>A vezetőség döntéseit minden tag köteles elfogadni.</li>
+                            <li>A frakción belül tisztelet és megfelelő viselkedés elvárt.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-heading font-bold text-white text-base uppercase text-red-primary mb-1">II. RP és Frakciós Tevékenység</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-gray-300">
+                            <li>Minden tagnak törekednie kell a minőségi RP-re.</li>
+                            <li>MG, PG, DM, RK és egyéb szabályszegés tilos.</li>
+                            <li>Nagyobb akciót vezetői engedély nélkül indítani tilos.</li>
+                            <li>Frakciós fegyvereket és járműveket csak rendeltetésszerűen lehet használni.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-heading font-bold text-white text-base uppercase text-red-primary mb-1">III. Titoktartás és Lojalitás</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-gray-300">
+                            <li>A frakció belső ügyeit és információit külső személynek továbbadni tilos.</li>
+                            <li>A frakció Discordján található belső információk bizalmasak.</li>
+                            <li>A frakció érdekeinek szándékos veszélyeztetése súlyos vétség.</li>
+                            <li>A család tagjai kötelesek egymást támogatni és tiszteletben tartani.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-heading font-bold text-white text-base uppercase text-red-primary mb-1">IV. Hibapontszabályzat</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-gray-300">
+                            <li>Kisebb szabályszegésért 1 hibapont járhat.</li>
+                            <li>Súlyosabb vagy ismétlődő szabályszegésért 2 hibapont adható.</li>
+                            <li>3 hibapont elérése automatikus frakcióból való eltávolítást jelent.</li>
+                            <li>Súlyos vétség esetén a vezetőség hibapont nélkül is azonnal eltávolíthatja a tagot.</li>
+                            <li>A hibapontokat kizárólag vezetőségi tag oszthatja ki.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-heading font-bold text-white text-base uppercase text-red-primary mb-1">V. Záró Rendelkezések</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-gray-300">
+                            <li>A frakció minden tagja köteles betartani a Dawn MTA szerver szabályzatát.</li>
+                            <li>Aki a frakcióba belép, automatikusan elfogadja a jelen szabályzatot.</li>
+                            <li>A szabályzat nem ismerete nem mentesít a következmények alól.</li>
+                            <li>A vezetőség fenntartja a jogot a szabályzat módosítására.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-center pt-4 border-t border-dark-border">
+                    <span class="font-heading font-black text-white block">Slovensky Maffia</span>
+                    <p class="text-xs text-gray-400 italic mt-1">„A család nem kérdez. A család összetart.”</p>
+                </div>
+            </div>
+            
+            <div class="bg-dark px-6 py-4 border-t border-dark-border text-right">
+                <button onclick="closeRulesModal()" class="bg-red-primary hover:bg-red-hover text-white text-xs font-mono font-bold uppercase px-6 py-2.5 rounded transition-colors">
+                    Megértettem & Bezárás
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT -->
     <script>
         const defaultUsers = [
-            { id: 1, user: 'admin', pass: 'admin123', role: 'Admin', rank: 'Don / Boss' },
-            { id: 2, user: 'leader', pass: 'leader123', role: 'Vezető', rank: 'Underboss' }
+            { id: 1, user: 'admin', pass: 'admin123', role: 'Admin', rank: 'Head of the Family' },
+            { id: 2, user: 'leader', pass: 'leader123', role: 'Vezető', rank: 'Deputy Leader' }
         ];
 
         let users = JSON.parse(localStorage.getItem('sm_users')) || defaultUsers;
@@ -298,13 +426,14 @@
         let vaultLogs = JSON.parse(localStorage.getItem('sm_vault_logs')) || [];
         let supplyRequests = JSON.parse(localStorage.getItem('sm_supply_requests')) || [];
 
-        function saveUsers() { localStorage.setItem('sm_users', JSON.stringify(users)); }
-        function saveVaultData() { localStorage.setItem('sm_vault_data', JSON.stringify(vaultData)); }
-        function saveVaultLogs() { localStorage.setItem('sm_vault_logs', JSON.stringify(vaultLogs)); }
-        function saveSupplyRequests() { localStorage.setItem('sm_supply_requests', JSON.stringify(supplyRequests)); }
-
         function openAuthModal() { if (!currentUser) document.getElementById('authModal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+        function openRanksModal() { document.getElementById('ranksModal').classList.remove('hidden'); }
+        function closeRanksModal() { document.getElementById('ranksModal').classList.add('hidden'); }
+
+        function openRulesModal() { document.getElementById('rulesModal').classList.remove('hidden'); }
+        function closeRulesModal() { document.getElementById('rulesModal').classList.add('hidden'); }
 
         function handleLogin() {
             const u = document.getElementById('loginUser').value.trim();
@@ -344,7 +473,7 @@
                 document.getElementById('dashUserRole').innerText = currentUser.role || 'Tag';
                 document.getElementById('dashUserRank').innerText = currentUser.rank || 'Nincs Rang';
 
-                // Széf kirajzolása
+                // Széf adatok betöltése
                 document.getElementById('dashMoney').innerText = '$' + Number(vaultData.money || 0).toLocaleString();
                 document.getElementById('dashRadio').innerText = vaultData.radio || '---.- MHz';
                 
@@ -373,7 +502,7 @@
             }
         }
 
-        function saveVaultData() {
+        function updateVaultData() {
             const m = parseInt(document.getElementById('editVaultMoney').value);
             const r = document.getElementById('editVaultRadio').value.trim();
             const url = document.getElementById('editVaultImgUrl').value.trim();
@@ -382,26 +511,25 @@
             if (r) vaultData.radio = r;
             vaultData.imageUrl = url;
 
-            saveVaultData();
+            localStorage.setItem('sm_vault_data', JSON.stringify(vaultData));
             renderAll();
-            alert('Széf adatai és a kép elmentve!');
+            alert('Széf adatai és a kép sikeresen elmentve!');
         }
 
         function createNewAccount() {
             const u = document.getElementById('newUsername').value.trim();
             const p = document.getElementById('newPassword').value.trim();
-            const r = document.getElementById('newRank').value.trim() || 'Katona';
+            const r = document.getElementById('newRank').value;
             const role = document.getElementById('newRole').value;
 
             if (!u || !p) return alert('Kérlek add meg a felhasználónevet és a jelszót!');
             if (users.some(x => x.user === u)) return alert('Ez a felhasználónév már létezik!');
 
             users.push({ id: Date.now(), user: u, pass: p, role: role, rank: r });
-            saveUsers();
+            localStorage.setItem('sm_users', JSON.stringify(users));
 
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
-            document.getElementById('newRank').value = '';
 
             renderUsersList();
             alert(`Új fiók sikeresen létrehozva!\nFelhasználó: ${u}\nRang: ${r}\nJogosultság: ${role}`);
@@ -410,7 +538,7 @@
         function deleteUser(id) {
             if (confirm('Biztosan törölni szeretnéd ezt a fiókot?')) {
                 users = users.filter(x => x.id !== id);
-                saveUsers();
+                localStorage.setItem('sm_users', JSON.stringify(users));
                 renderUsersList();
             }
         }
@@ -441,7 +569,7 @@
 
             const dateStr = new Date().toLocaleString('hu-HU');
             vaultLogs.unshift({ id: Date.now(), user: currentUser.user, action, category, details, date: dateStr });
-            saveVaultLogs();
+            localStorage.setItem('sm_vault_logs', JSON.stringify(vaultLogs));
             document.getElementById('logItemDetails').value = '';
             renderVaultLogs();
         }
@@ -479,7 +607,7 @@
 
             const dateStr = new Date().toLocaleString('hu-HU');
             supplyRequests.unshift({ id: Date.now(), user: currentUser.user, category, item, amount, reason, status: 'AKTÍV', date: dateStr });
-            saveSupplyRequests();
+            localStorage.setItem('sm_supply_requests', JSON.stringify(supplyRequests));
 
             document.getElementById('reqItemName').value = '';
             document.getElementById('reqAmount').value = '';
@@ -521,7 +649,7 @@
             reader.onload = function(e) {
                 try {
                     users = JSON.parse(e.target.result);
-                    saveUsers();
+                    localStorage.setItem('sm_users', JSON.stringify(users));
                     renderUsersList();
                     alert('Sikeres importálás!');
                 } catch (err) { alert('Hiba a fájl beolvasásakor!'); }
